@@ -1,4 +1,4 @@
-module kenrms/message-processing-service
+module kenrms/jubibot-response-lambda
 
 go 1.22.3
 

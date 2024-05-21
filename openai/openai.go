@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"kenrms/message-processing-service/messageData"
+	"kenrms/jubibot-response-lambda/messageData"
 	"net/http"
 	"os"
 )
@@ -73,7 +73,7 @@ func GetReplyFromOpenAI(messageData messageData.MessageData) (string, error) {
 		Messages: []OpenAIMessage{
 			{
 				Role:    "system",
-				Content: "You are a Discord Bot named JubiBot-2.",
+				Content: "You are a Discord Bot named JubiBot-2. You will receive information about messages in discord and will respond in a natural way.",
 			},
 			{
 				Role:    "user",

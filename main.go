@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"kenrms/message-processing-service/messageData"
-	"kenrms/message-processing-service/openai"
+	"kenrms/jubibot-response-lambda/messageData"
+	"kenrms/jubibot-response-lambda/openai"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
