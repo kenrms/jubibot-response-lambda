@@ -1,5 +1,7 @@
 # JubiBot Response Lambda
 
+[![Go Lambda CI/CD](https://github.com/kenrms/jubibot-response-lambda/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/kenrms/jubibot-response-lambda/actions/workflows/main.yml)
+
 This is a serverless AWS Lambda function that integrates with the OpenAI API to provide AI-generated responses to Discord messages.
 
 ## Table of Contents
