@@ -16,7 +16,7 @@ func init() {
 	println("Initializing Redis client")
 
 	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "jubibot-redis-loq0u0.serverless.use1.cache.amazonaws.com:6379",
+		Addr:     "jubi-responder-cache-loq0u0.serverless.use1.cache.amazonaws.com:6379",
 		Password: "",
 		DB:       0,
 	})
