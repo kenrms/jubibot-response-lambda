@@ -4,7 +4,7 @@ go 1.22.3
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/go-redis/redis/v8 v8.11.5
+	github.com/redis/go-redis/v9 v9.6.0
 )
 
 require (
