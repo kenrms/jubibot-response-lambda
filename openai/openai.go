@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"kenrms/jubibot-response-lambda/constants"
 	"kenrms/jubibot-response-lambda/messageData"
 	"net/http"
 	"os"
@@ -43,43 +44,55 @@ type OpenAIResponse struct {
 	} `json:"usage"`
 }
 
-func GetReplyFromOpenAI(messageData messageData.MessageData) (string, error) {
+func GetReplyFromOpenAI(conversation []messageData.MessageData) (string, error) {
 	openAIAPIKey := os.Getenv("OPENAI_API_KEY")
 	if openAIAPIKey == "" {
 		return "", fmt.Errorf("OPENAI_API_KEY environment variable is not set")
 	}
 
-	var messageContent string
-	// if we have referencedMessage information, include that
-	if messageData.ReferencedMessageID != "" {
-		messageContent = fmt.Sprintf("Respond to the following message:\n\nChannel ID: %s\nMessage Content: %s\nReferenced Message ID: %s\nReferenced Message Content: %s\nReferenced Message Author: %s",
-			messageData.ChannelID,
-			messageData.MessageContent,
-			messageData.ReferencedMessageID,
-			messageData.ReferencedMessageContent,
-			messageData.ReferencedMessageAuthor)
+	messages := []OpenAIMessage{
+		{
+			Role:    "system",
+			Content: constants.OPEN_AI_SYSTEM_PROMPT,
+		},
 	}
-	// if we don't have referencedMessage information, just include the message content
-	if messageData.ReferencedMessageID == "" {
-		messageContent = fmt.Sprintf("Respond to the following message:\n\nChannel ID: %s\nMessage Content: %s",
-			messageData.ChannelID,
-			messageData.MessageContent)
+
+	for _, message := range conversation {
+		if message.AuthorUsername == constants.BOT_NAME {
+			messages = append(messages, OpenAIMessage{
+				Role:    "assistant",
+				Content: message.MessageContent,
+			})
+		} else {
+			var body string
+			if message.ReferencedMessageID != "" {
+				body = fmt.Sprintf("This message is in response to another message. Here is the response: \n\n --- \n\n "+
+					"Author: %s\n"+
+					"Message: %s\n"+
+					"---\n\n"+
+					"This is the message this this is responding to:\n\n"+
+					"---\n\n"+
+					"Reference Author: %s\n"+
+					"Refereance Message: %s",
+					message.AuthorUsername,
+					message.MessageContent,
+					message.ReferencedMessageAuthor,
+					message.ReferencedMessageContent)
+			} else {
+				body = fmt.Sprintf("Author: %s\nMessage: %s", message.AuthorUsername, message.MessageContent)
+			}
+
+			messages = append(messages, OpenAIMessage{
+				Role:    "user",
+				Content: body,
+			})
+		}
 	}
 
 	// TODO get this configuration info from config API
 	openAIRequest := OpenAIRequest{
-		Model: "gpt-3.5-turbo",
-		// TODO get conversation history from cache
-		Messages: []OpenAIMessage{
-			{
-				Role:    "system",
-				Content: "You are a Discord Bot named JubiBot-2. You will receive information about messages in discord and will respond in a natural way.",
-			},
-			{
-				Role:    "user",
-				Content: messageContent,
-			},
-		},
+		Model:       "gpt-3.5-turbo",
+		Messages:    messages,
 		MaxTokens:   2048,
 		Temperature: 0.7,
 		TopP:        1,
