@@ -33,6 +33,13 @@ func Handler(ctx context.Context, apiGatewayEvent events.APIGatewayProxyRequest)
 	fmt.Printf("Received message data: %+v\n", msgData)
 
 	commandResponse, err := HandleCommands(msgData)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       fmt.Sprintf("Error handling commands: %v", err),
+		}, nil
+	}
+
 	// if there is a command response, return it
 	if commandResponse != "" {
 		response = commandResponse
@@ -40,6 +47,13 @@ func Handler(ctx context.Context, apiGatewayEvent events.APIGatewayProxyRequest)
 
 		// Get conversation history from redisBroker
 		channelConversation, err := redisBroker.GetConversationHistory(msgData.ChannelID)
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       fmt.Sprintf("Error getting conversation history: %v", err),
+			}, nil
+		}
+
 		// append new incoming message to conversation history
 		channelConversation = append(channelConversation, msgData)
 
@@ -56,8 +70,6 @@ func Handler(ctx context.Context, apiGatewayEvent events.APIGatewayProxyRequest)
 			MessageContent: reply,
 			ChannelID:      msgData.ChannelID,
 		}
-
-		// if the message is not from the bot, set IsParentMessageBot to true
 
 		// add the reply to the conversation history
 		channelConversation = append(channelConversation, replyMessageData)
@@ -93,7 +105,7 @@ func HandleCommands(messageData messageData.MessageData) (string, error) {
 
 			return "Conversation history cleared.", nil
 		} else {
-			return "", fmt.Errorf("You are not authorized to clear the conversation history.")
+			return "", fmt.Errorf("you are not authorized to clear the conversation history.")
 		}
 	}
 
@@ -104,6 +116,6 @@ func IsAdmin(messageData messageData.MessageData) bool {
 	// Implement your logic to check if the user is an admin
 	// For example, you could check if the user's role is "admin" or has specific permissions
 
-	// for now, just return true if the message author is "vonnycakes"
-	return messageData.AuthorUsername == "vonnycakes"
+	// for now, just return true if the message author is vonn
+	return messageData.AuthorUsername == constants.BOT_AUTHOR
 }
