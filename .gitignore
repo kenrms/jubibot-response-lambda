@@ -16,6 +16,7 @@ go.work
 # Folders
 _obj
 _test
+_temp
 
 # Architecture specific extensions/prefixes
 *.cgo1.go
