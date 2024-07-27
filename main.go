@@ -7,7 +7,6 @@ import (
 	"kenrms/jubibot-response-lambda/constants"
 	"kenrms/jubibot-response-lambda/messageData"
 	"kenrms/jubibot-response-lambda/openai"
-	"kenrms/jubibot-response-lambda/redisBroker"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -46,7 +45,8 @@ func Handler(ctx context.Context, apiGatewayEvent events.APIGatewayProxyRequest)
 	} else {
 
 		// Get conversation history from redisBroker
-		channelConversation, err := redisBroker.GetConversationHistory(msgData.ChannelID)
+		channelConversation := []messageData.MessageData{}
+		//channelConversation, err := redisBroker.GetConversationHistory(msgData.ChannelID)
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
@@ -75,7 +75,7 @@ func Handler(ctx context.Context, apiGatewayEvent events.APIGatewayProxyRequest)
 		channelConversation = append(channelConversation, replyMessageData)
 
 		// save the updated conversation history to redisBroker
-		err = redisBroker.SaveConversationHistory(msgData.ChannelID, channelConversation)
+		//err = redisBroker.SaveConversationHistory(msgData.ChannelID, channelConversation)
 		if err != nil {
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
@@ -98,12 +98,12 @@ func HandleCommands(messageData messageData.MessageData) (string, error) {
 	if messageData.MessageContent == "j!clear" {
 		// ensure user is an admin first
 		if IsAdmin(messageData) {
-			err := redisBroker.ClearConversationHistory(messageData.ChannelID)
-			if err != nil {
-				return "", err
-			}
+			// err := redisBroker.ClearConversationHistory(messageData.ChannelID)
+			// if err != nil {
+			// 	return "", err
+			// }
 
-			return "Conversation history cleared.", nil
+			// return "Conversation history cleared.", nil
 		} else {
 			return "", fmt.Errorf("you are not authorized to clear the conversation history.")
 		}
